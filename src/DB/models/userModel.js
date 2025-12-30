@@ -12,7 +12,7 @@ const userSchema = new Schema({
         public_id: { type: String }
     },
     token: { type: String },
-    isActive: { type: String, default: "Active" },
+    isActive: { type: String, default: true },
     customId: { type: String  }
 },{ timestamps: true })
 

@@ -69,7 +69,6 @@ userRouter.post('/register', userCon.register);
  *         description: Login success
  */
 userRouter.post('/login', userCon.login);
-
 /**
  * @swagger
  * /api/v1/users:
@@ -81,6 +80,18 @@ userRouter.post('/login', userCon.login);
  *         description: List of all users
  */
 userRouter.get('/', userCon.getAllUsers);
+
+/**
+ * @swagger
+ * /api/v1/user:
+ *   get:
+ *     summary: Get One user
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: display one user
+ */
+userRouter.get('/:id', userCon.getOneUsers);
 
 /**
  * @swagger
@@ -172,14 +183,136 @@ userRouter.put(
  *       200:
  *         description: User deleted successfully
  */
-
 userRouter.delete('/:id', userCon.deleteUser);
 
-userRouter.post('/forget',userCon.forgetPassword)
+/**
+ * @swagger
+ * /api/v1/users/logout:
+ *   post:
+ *     summary: Logout user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ */
+userRouter.post('/logout', userCon.logout);
+
+/**
+ * @swagger
+ * /api/v1/users/forget-password:
+ *   post:
+ *     summary: Send reset password email
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Reset email sent successfully
+ */
+userRouter.post('/forget-password', userCon.forgetPassword);
+
+/**
+ * @swagger
+ * /api/v1/users/reset/{token}:
+ *   post:
+ *     summary: Reset password using token
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ */
+userRouter.post('/reset/:token', userCon.resetPassword);
+
 userRouter.post('/reset/:token',userCon.resetPassword)
 
-userRouter.post('/change_password',userCon.changePassword)
-userRouter.post('/multy',userCon.multyDeleteUsers)
+/**
+ * @swagger
+ * /api/v1/users/change_password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ */
+userRouter.post('/change_password', userCon.changePassword);
+
+
+/**
+ * @swagger
+ * /api/v1/users/multy:
+ *   post:
+ *     summary: Delete multiple users
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ids
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Users deleted successfully
+ */
+userRouter.post('/multy', userCon.multyDeleteUsers);
 
 export default userRouter;
 

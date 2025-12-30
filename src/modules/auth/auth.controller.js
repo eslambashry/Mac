@@ -99,6 +99,21 @@ export const getAllUsers = async(req,res,next) => {
     })
 }
 
+export const getOneUsers = async(req,res,next) => { 
+    const id = req.params.id
+    const user = await UserModel.findById(id)
+
+    if (!user) {
+        return next(new CustomError('No user found', 404));
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'done', 
+        user
+    })
+}
+
 export const addUser = async (req, res, next) => {
   const { userName, email, password, role} = req.body;
     
@@ -182,7 +197,7 @@ export const UpdateUser = async(req,res,next) => {
           if(userName) user.userName = userName
           if(email) user.email = email
           if(role) user.role = role
-          if(isActive) user.isActive = "Not Active"
+          if(isActive) user.isActive = isActive
 
           if(password) {
             const hashedPassword = pkg.hashSync(password, +process.env.SALT_ROUNDS)
@@ -209,54 +224,45 @@ export const deleteUser = async(req,res,next) => {
 }
 
 export const logout = async (req, res, next) => {
-    try {
-      const { token } = req.body;
-      if (!token) {
-        return res.status(400).json({ message: "Token is required" });
-      }
-  
-      let decoded;
-      try {
-        decoded = jwt.verify(token, process.env.SIGN_IN_TOKEN_SECRET);
-      } catch (error) {
-        if (error.name === "TokenExpiredError") {
+  try {
+    const { token } = req.body;
 
-            decoded = jwt.decode(token);
-        } else {
-            console.log(error);
-            
-          return res.status(401).json({ message: "Invalid token" });
-        }
-      }
-  
-      if (!decoded || !decoded.email) {
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
+    }
+
+    let decoded;
+
+    try {
+      decoded = verifyToken({
+        token,
+        signature: process.env.SIGN_IN_TOKEN_SECRET,
+      });
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        decoded = jwt.decode(token);
+      } else {
         return res.status(401).json({ message: "Invalid token" });
       }
-  
-      const email = decoded.email;
-  
-      // console.log("Decoded email:", email);
-  
-      // البحث عن المستخدم
-      const user = await UserModel.findOne({ email });
-  
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      // تحديث حالة المستخدم إلى "offline" حتى لو كان التوكن منتهي الصلاحية
-      await UserModel.findOneAndUpdate(
-        { email },
-        { token: null, isActive:false },
-        { new: true }
-      );
-  
-      res.status(200).json({ message: "Logout successful" });
-    } catch (error) {
-      console.error("Logout Error:", error);
-      res.status(500).json({ message: "Internal server error" });
     }
-}
+
+    if (!decoded?.email) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    await UserModel.findOneAndUpdate(
+      { email: decoded.email },
+      { token: null },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
   export const forgetPassword = async(req,res,next) => {
     const {email} = req.body

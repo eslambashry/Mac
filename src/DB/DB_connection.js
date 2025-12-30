@@ -5,6 +5,6 @@ config({path: path.resolve('./config/.env')})
 
 export const DB = mongoose
 .connect(process.env.DB_URL)
-.then(() => {console.log("DB Connection Done 📶")})
-.catch((err) => {console.log("Connection fail 💩")})
+.then(() => {console.log("DB Connection Done 📶".bold.blue.italic)})
+.catch((err) => {console.log("Connection fail 💩".bold.red)})
 

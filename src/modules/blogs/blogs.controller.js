@@ -6,42 +6,53 @@ import imagekit from '../../utilities/imagekitConfigration.js';
 
 export const createBlog = async (req, res, next) => {
   try {
-
     const {
-      title_ar, title_en,
-      content_ar, content_en,
-      author_ar, author_en,
-      autherJobTitle_ar, autherJobTitle_en,
-      category_ar, category_en,readTime
+      title_ar,
+      title_en,
+      content_ar,
+      content_en,
+      author_ar,
+      author_en,
+      authorJobTitle_ar,
+      authorJobTitle_en,
+      category_ar,
+      category_en,
+      readTime,
     } = req.body;
 
-    // Validate required fields
+    // 🔴 Validate required fields
     if (
-      !title_ar || !title_en ||
-      !content_ar || !content_en ||
-      !author_ar || !author_en ||
-      !autherJobTitle_ar || !autherJobTitle_en ||
-      !category_ar || !category_en
+      !title_ar ||
+      !title_en ||
+      !content_ar ||
+      !content_en ||
+      !author_ar ||
+      !author_en ||
+      !authorJobTitle_ar ||
+      !authorJobTitle_en ||
+      !category_ar ||
+      !category_en ||
+      !readTime
     ) {
       return next(new CustomError("All fields are required", 400));
     }
 
-    // Extract uploaded images
+    // 🔴 Validate images
     const imageFiles = req.files?.images || [];
     if (imageFiles.length === 0) {
       return next(new CustomError("At least one image is required", 400));
     }
 
-    // Extract author image
-    // const authorImage = req.files?.authorImage?.[0] || null;
-    // if (!authorImage) {
-    //   return next(new CustomError("Author image is required", 400));
-    // }
+    // 🔴 Validate author image
+    const authorImageFile = req.files?.authorImage?.[0];
+    if (!authorImageFile) {
+      return next(new CustomError("Author image is required", 400));
+    }
 
     const customId = nanoid();
     const uploadedImages = [];
 
-    // Upload blog images
+    // ✅ Upload blog images
     for (const file of imageFiles) {
       const uploadResult = await imagekit.upload({
         file: file.buffer,
@@ -55,42 +66,32 @@ export const createBlog = async (req, res, next) => {
       });
     }
 
-    // Upload author image
-    // const uploadAuthorImage = await imagekit.upload({
-    //   file: authorImage.buffer,
-    //   fileName: authorImage.originalname,
-    //   folder: `${process.env.PROJECT_FOLDER}/Blogs/${customId}/Author`,
-    // });
+    // ✅ Upload author image
+    const uploadAuthorImage = await imagekit.upload({
+      file: authorImageFile.buffer,
+      fileName: authorImageFile.originalname,
+      folder: `${process.env.PROJECT_FOLDER}/Blogs/${customId}/Author`,
+    });
 
-    // Save blog to DB
+    // ✅ Save blog
     const newBlog = new BlogsModel({
-      title: {
-        ar: title_ar,
-        en: title_en,
-      },
-      content: {
-        ar: content_ar,
-        en: content_en,
-      },
-      author: {
-        ar: author_ar,
-        en: author_en,
-      },
-      autherJobTitle: {
-        ar: autherJobTitle_ar,
-        en: autherJobTitle_en,
-      },
+      title_ar,
+      title_en,
+      content_ar,
+      content_en,
+      author_ar,
+      author_en,
+      authorJobTitle_ar,
+      authorJobTitle_en,
+      category_ar,
+      category_en,
       readTime,
-      category: {
-        ar: category_ar,
-        en: category_en,
-      },
+      customId,
+      images: uploadedImages,
       authorImage: {
         imageLink: uploadAuthorImage.url,
         public_id: uploadAuthorImage.fileId,
       },
-      customId,
-      images: uploadedImages,
     });
 
     await newBlog.save();
@@ -100,12 +101,12 @@ export const createBlog = async (req, res, next) => {
       message: "Blog created successfully",
       blog: newBlog,
     });
-
   } catch (error) {
     console.error(error);
     return next(error);
   }
 };
+
 
 
 export const getAllBlogs = async (req, res, next) => {
