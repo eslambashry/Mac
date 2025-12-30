@@ -1,8 +1,8 @@
 import { BlogsModel } from '../../DB/models/blogsModel.js';
 import { customAlphabet } from 'nanoid'
-const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 5)
 import CustomError from "../../utilities/customError.js"
 import imagekit from '../../utilities/imagekitConfigration.js';
+const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 5)
 
 export const createBlog = async (req, res, next) => {
   try {
@@ -11,10 +11,6 @@ export const createBlog = async (req, res, next) => {
       title_en,
       content_ar,
       content_en,
-      author_ar,
-      author_en,
-      authorJobTitle_ar,
-      authorJobTitle_en,
       category_ar,
       category_en,
       readTime,
@@ -26,10 +22,6 @@ export const createBlog = async (req, res, next) => {
       !title_en ||
       !content_ar ||
       !content_en ||
-      !author_ar ||
-      !author_en ||
-      !authorJobTitle_ar ||
-      !authorJobTitle_en ||
       !category_ar ||
       !category_en ||
       !readTime
@@ -43,11 +35,6 @@ export const createBlog = async (req, res, next) => {
       return next(new CustomError("At least one image is required", 400));
     }
 
-    // 🔴 Validate author image
-    const authorImageFile = req.files?.authorImage?.[0];
-    if (!authorImageFile) {
-      return next(new CustomError("Author image is required", 400));
-    }
 
     const customId = nanoid();
     const uploadedImages = [];
@@ -66,12 +53,6 @@ export const createBlog = async (req, res, next) => {
       });
     }
 
-    // ✅ Upload author image
-    const uploadAuthorImage = await imagekit.upload({
-      file: authorImageFile.buffer,
-      fileName: authorImageFile.originalname,
-      folder: `${process.env.PROJECT_FOLDER}/Blogs/${customId}/Author`,
-    });
 
     // ✅ Save blog
     const newBlog = new BlogsModel({
@@ -79,19 +60,11 @@ export const createBlog = async (req, res, next) => {
       title_en,
       content_ar,
       content_en,
-      author_ar,
-      author_en,
-      authorJobTitle_ar,
-      authorJobTitle_en,
       category_ar,
       category_en,
       readTime,
       customId,
       images: uploadedImages,
-      authorImage: {
-        imageLink: uploadAuthorImage.url,
-        public_id: uploadAuthorImage.fileId,
-      },
     });
 
     await newBlog.save();

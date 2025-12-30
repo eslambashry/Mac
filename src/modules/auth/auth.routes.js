@@ -86,7 +86,7 @@ userRouter.get('/', userCon.getAllUsers);
  * /api/v1/user:
  *   get:
  *     summary: Get One user
- *     tags: [User]
+ *     tags: [Users]
  *     responses:
  *       200:
  *         description: display one user
@@ -260,7 +260,6 @@ userRouter.post('/forget-password', userCon.forgetPassword);
  */
 userRouter.post('/reset/:token', userCon.resetPassword);
 
-userRouter.post('/reset/:token',userCon.resetPassword)
 
 /**
  * @swagger
