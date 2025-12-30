@@ -271,7 +271,7 @@ export const logout = async (req, res, next) => {
     if(!isExist){
         return res.status(400).json({message: "Email not found"})
     }
-
+    
     const code = nanoid()
     const hashcode = pkg.hashSync(code, +process.env.SALT_ROUNDS) // ! process.env.SALT_ROUNDS
     const token = generateToken({
@@ -282,6 +282,7 @@ export const logout = async (req, res, next) => {
         signature: process.env.RESET_TOKEN, // ! process.env.RESET_TOKEN
         expiresIn: '1h',
     })
+    
     const resetPasswordLink = `${req.protocol}://${req.headers.host}/user/reset/${token}`
     const isEmailSent = sendEmailService({
         to:email,

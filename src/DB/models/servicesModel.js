@@ -1,65 +1,61 @@
-import { Schema, model } from "mongoose";
+import {Schema,model} from "mongoose";
 
-const ReviewSchema = new Schema({
-  authorName: String,
-  rating: { type: Number, min: 1, max: 5 },
-  body: String,
-  screenShots: [
-    {
-      imageLink: String,
-      public_id: String
-    }
-  ],
-},{timestamps: true});
-
-const ServiceSchema = new Schema(
+const serviceItemSchema = new Schema(
   {
-    // 🔥 NAME
-    name_ar: { type: String, required: true },
-    name_en: { type: String, required: true },
+    title_en: String,
+    title_ar: String,
 
-    // 🔥 SLUG
-    slug: { type: String, required: true, unique: true },
+    category_en: String,
+    category_ar: String,
 
-    icon: { type: String },
-    color: { type: String },
+    description_en: String,
+    description_ar: String,
 
-    features: [{ 
-      feature_ar: String, 
-      feature_en: String
-    }],
+    image: {
+      imageLink: String,
+      public_id: String,
+    },
 
-    // 🔥 SHORT DESCRIPTION
-    shortDescription_ar: { type: String },
-    shortDescription_en: { type: String },
-
-    // 🔥 FULL DESCRIPTION
-    description_ar: { type: String },
-    description_en: { type: String },
-
-    // BASIC SERVICE INFO
-    serviceType: String,
-    price: Number,
-    currency: String,
-
-    // IMAGES
-    images: [
-      {
-        imageLink: { type: String, required: true },
-        public_id: { type: String, required: true }
-      }
-    ],
-
-    // REVIEWS
-    reviews: [ReviewSchema],
-
-    // AGGREGATE RATING
-    aggregateRating_ratingValue: Number,
-    aggregateRating_reviewCount: Number,
-    customId: { type: String},
-    createdAt: { type: Date, default: Date.now }
+    order: Number,
   },
-  { timestamps: true }
+  { _id: false }
 );
 
-export const serviceModel = model("Service", ServiceSchema);
+const serviceSectionSchema = new Schema(
+  {
+    // 🔹 Section Header (Hard Services)
+    header: {
+      title_en: {
+        type: String,
+        required: true,
+      },
+      title_ar: {
+        type: String,
+        required: true,
+      },
+      description_en: {
+        type: String,
+        required: true,
+      },
+      description_ar: {
+        type: String,
+        required: true,
+      }
+    },
+
+    services: [serviceItemSchema],
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    }
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export const serviceModel = model(
+  "ServiceSection",
+  serviceSectionSchema
+);

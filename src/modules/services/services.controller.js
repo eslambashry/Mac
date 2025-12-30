@@ -6,100 +6,100 @@ import CustomError from "../../utilities/customError.js";
 import imagekit, { destroyImage } from "../../utilities/imagekitConfigration.js";
 
 export const createService = async (req, res, next) => {
-  
-    console.log(req.body);
-  if (req.body["feature_ar."]) req.body.feature_ar = req.body["feature_ar."];
-  if (req.body["feature_en."]) req.body.feature_en = req.body["feature_en."];
+  try {
     const {
-      name_ar,
-      name_en,
-      icon,
-      color,
-      feature_ar,
-      feature_en,
-      shortDescription_ar,
-      shortDescription_en,
-      description_ar,
-      description_en,
-      serviceType,
-      price,
-      currency,
-      aggregateRating_ratingValue,
-      aggregateRating_reviewCount
+      header_title_en,
+      header_title_ar,
+      header_description_en,
+      header_description_ar,
+      services // array of service items
     } = req.body;
-    
-    // 🔥 Validate required fields
-    if (!name_ar || !name_en) {
-      return next(new CustomError("Arabic and English names are required", 400));
+
+    // 🔴 Validate header
+    if (
+      !header_title_en ||
+      !header_title_ar ||
+      !header_description_en ||
+      !header_description_ar
+    ) {
+      return next(new CustomError("Service section header is required", 400));
     }
 
-    if (!description_ar || !description_en) {
-      return next(new CustomError("Descriptions (AR + EN) are required", 400));
+    // 🔴 Validate services array
+    if (!services || !Array.isArray(services) || services.length === 0) {
+      return next(new CustomError("At least one service is required", 400));
     }
 
-    const imageFiles = req.files || [];
-    if (imageFiles.length === 0) {
-      return next(new CustomError("At least one image is required", 400));
-    }
+    // 🔹 Prepare service items
+    const uploadedServices = [];
 
-    // 🔥 Create slug from English name
-    const slug = slugify(name_en, { replacement: '_', lower: true });
+    for (let i = 0; i < services.length; i++) {
+      const s = services[i];
 
-    // 🔥 Prepare upload folder
-    const customId = nanoid();
-    const uploadedImages = [];
+      if (
+        !s.title_en ||
+        !s.title_ar ||
+        !s.category_en ||
+        !s.category_ar ||
+        !s.description_en ||
+        !s.description_ar ||
+        !s.order
+      ) {
+        return next(new CustomError(`All fields are required for service #${i + 1}`, 400));
+      }
 
-    // 🔥 Upload images to ImageKit
-    for (const file of imageFiles) {
+      // 🔹 Handle image
+      const file = req.files[i]; // assuming images are uploaded as array with same order
+      if (!file) {
+        return next(new CustomError(`Image is required for service #${i + 1}`, 400));
+      }
+
       const uploadResult = await imagekit.upload({
         file: file.buffer,
         fileName: file.originalname,
-        folder: `${process.env.PROJECT_FOLDER}/Services/${customId}`,
+        folder: `${process.env.PROJECT_FOLDER}/Services/${nanoid()}`,
       });
 
-      uploadedImages.push({
-        imageLink: uploadResult.url,
-        public_id: uploadResult.fileId,
+      uploadedServices.push({
+        ...s,
+        order: Number(s.order),
+        image: {
+          imageLink: uploadResult.url,
+          public_id: uploadResult.fileId,
+        }
       });
     }
 
-    // 🔥 Create new service document
-    const newService = new serviceModel({
-      name_ar,
-      name_en,
-      slug,
-      icon,
-      color,
-    features: feature_ar && feature_en
-      ? feature_ar.map((fa, index) => ({
-          feature_ar: fa,
-          feature_en: feature_en[index] || "",
-        }))
-      : [],
-      shortDescription_ar,
-      shortDescription_en,
-      description_ar,
-      description_en,
-      serviceType,
-      price,
-      currency,
-      images: uploadedImages,
-      aggregateRating_ratingValue: aggregateRating_ratingValue || 0,
-      aggregateRating_reviewCount: aggregateRating_reviewCount || 0, 
-      customId,
-    });
-    
-    console.log(newService);
-    
+    // 🔹 Check if section exists
+    let serviceSection = await serviceModel.findOne({ "header.title_en": header_title_en });
 
-    await newService.save();
+    if (serviceSection) {
+      serviceSection.services.push(...uploadedServices);
+      await serviceSection.save();
+    } else {
+      serviceSection = await serviceModel.create({
+        header: {
+          title_en: header_title_en,
+          title_ar: header_title_ar,
+          description_en: header_description_en,
+          description_ar: header_description_ar,
+        },
+        services: uploadedServices,
+      });
+    }
 
     return res.status(201).json({
       success: true,
-      message: "Service created successfully",
-      service: newService,
+      message: "Services created successfully",
+      data: serviceSection
     });
+
+  } catch (error) {
+    console.error(error);
+    return next(error);
+  }
 };
+
 export const getAllServices = async (req, res, next) => {
   try {
     const services = await serviceModel.find().sort({ createdAt: -1 });
@@ -128,6 +128,75 @@ export const getServiceById= async (req, res, next) => {
       service,
     });
   }
+
+export const getAllArabicServices = async (req, res, next) => {
+  try {
+    const services = await serviceModel.find()
+      .sort({ createdAt: -1 })
+      .lean(); // lean() returns plain JS objects (better for mapping)
+
+    // Map to Arabic only
+    const arabicServices = services.map(section => ({
+      header: {
+        title: section.header.title_ar,
+        description: section.header.description_ar
+      },
+      services: section.services.map(s => ({
+        title: s.title_ar,
+        category: s.category_ar,
+        description: s.description_ar,
+        order: s.order,
+        image: s.image
+      })),
+      isActive: section.isActive,
+      createdAt: section.createdAt,
+      updatedAt: section.updatedAt
+    }));
+
+    return res.status(200).json({
+      success: true,
+      services: arabicServices
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getAllEnglishServices = async (req, res, next) => {
+  try {
+    const services = await serviceModel.find()
+      .sort({ createdAt: -1 })
+      .lean(); // returns plain JS objects
+
+    // Map to English only
+    const englishServices = services.map(section => ({
+      header: {
+        title: section.header.title_en,
+        description: section.header.description_en
+      },
+      services: section.services.map(s => ({
+        title: s.title_en,
+        category: s.category_en,
+        description: s.description_en,
+        order: s.order,
+        image: s.image
+      })),
+      isActive: section.isActive,
+      createdAt: section.createdAt,
+      updatedAt: section.updatedAt
+    }));
+
+    return res.status(200).json({
+      success: true,
+      services: englishServices
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+
 
 export const updateService = async (req, res, next) => {
   

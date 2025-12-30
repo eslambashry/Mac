@@ -46,14 +46,14 @@ const servicesRouter = Router();
 
 
 servicesRouter.post(
-    "/add",
-    multerCloudFunction(allowedExtensions.Image).array("images", 5),
-    servicesCon.createService
-    );
+  "/add",
+  multerCloudFunction(allowedExtensions.Image).any(),
+  servicesCon.createService
+);
     
 servicesRouter.put(
     "/:id",
-    multerCloudFunction(allowedExtensions.Image).array("images", 5),
+    multerCloudFunction(allowedExtensions.Image).array("image", 5),
     servicesCon.updateService
 );
 
@@ -68,6 +68,32 @@ servicesRouter.put(
  *         description: List of all services
  */
 servicesRouter.get("/",servicesCon.getAllServices);
+
+/**
+ * @swagger
+ * /api/v1/services/ar:
+ *   get:
+ *     summary: Get all Arabic Services
+ *     tags: [Services]
+ *     responses:
+ *       200:
+ *         description: List of all Arabic services
+ */
+servicesRouter.get("/ar",servicesCon.getAllArabicServices);
+
+/**
+ * @swagger
+ * /api/v1/services/en:
+ *   get:
+ *     summary: Get all English Services
+ *     tags: [Services]
+ *     responses:
+ *       200:
+ *         description: List of all English services
+ */
+servicesRouter.get("/en",servicesCon.getAllEnglishServices);
+
+
 
 
 /**
@@ -88,6 +114,7 @@ servicesRouter.get("/",servicesCon.getAllServices);
  *         description: Service data
  */
 servicesRouter.get("/:id",servicesCon.getServiceById);
+
 
 
 /**
