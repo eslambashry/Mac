@@ -1,0 +1,37 @@
+{
+  "name": "mac",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000M\u0000a\u0000c\u0000\r\u0000 \u0000",
+  "keywords": [
+    "store",
+    "blogs"
+  ],
+  "homepage": "https://github.com/eslambashry/Mac#readme",
+  "bugs": {
+    "url": "https://github.com/eslambashry/Mac/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eslambashry/Mac.git"
+  },
+  "license": "ISC",
+  "author": "eslamhussin600@gmail.com",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemone src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@colors/colors": "^1.6.0",
+    "bcrypt": "^6.0.0",
+    "config": "^4.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.0.2",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "nodemon": "^3.1.11"
+  }
+}
