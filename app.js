@@ -31,9 +31,9 @@ const swaggerSpec = swaggerJSDoc({
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "techvoba API Documentation  📡",
+      title: "MACC API Documentation  📡",
       version: "1.0.0",
-      description: "API documentation for the techvoba backend services",
+      description: "API documentation for the MACC backend services",
     },
      servers: [
       {
@@ -41,7 +41,7 @@ const swaggerSpec = swaggerJSDoc({
         description: "Local Server",
       },
       {
-        url: "https://techvoba.vercel.app/",
+        url: "https://MACC.vercel.app/",
         description: "Production Server",
       },
     ],
