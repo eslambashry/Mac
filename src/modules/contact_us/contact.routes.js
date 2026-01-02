@@ -23,22 +23,31 @@ const contactRoute = Router();
  *           schema:
  *             type: object
  *             required:
- *               - name
- *               - email
+ *               - fullName
+ *               - companyEmail
  *               - message
- *               - phone
+ *               - phoneNumber
+ *               - companyName
  *             properties:
- *               name:
+ *               fullName:
  *                 type: string
+ *                 example: John Doe
  *                 description: Sender's full name
- *               email:
+ *               companyName:
  *                 type: string
+ *                 example: MACC Solutions
+ *                 description: Company name (optional)
+ *               companyEmail:
+ *                 type: string
+ *                 example: john@macc.com
  *                 description: Sender's email address
- *               phone:
+ *               phoneNumber:
  *                 type: string
- *                 description: (Optional) Phone number
+ *                 example: "+201234567890"
+ *                 description: Phone number (optional)
  *               message:
  *                 type: string
+ *                 example: I would like to know more about your services.
  *                 description: Message content sent by the user
  *     responses:
  *       200:
@@ -48,6 +57,7 @@ const contactRoute = Router();
  *       500:
  *         description: Server error
  */
+
 contactRoute.post("/send", sendContactUsEmail);
 
 export default contactRoute;
