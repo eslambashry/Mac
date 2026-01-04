@@ -23,7 +23,7 @@ app.use(express.json());
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/services', servicesRouter)
 app.use('/api/v1/contact', contactRoute)
-app.use('/api/v1/career', careerRouter)
+app.use('/api/v1/careers', careerRouter)
 app.use('/api/v1/applications', applicationRouter)
 
 app.use(globalResponse);
