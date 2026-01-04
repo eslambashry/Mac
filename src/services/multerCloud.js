@@ -1,24 +1,34 @@
-import multer from 'multer'
-import { allowedExtensions } from '../utilities/allowedExtensions.js';
+import multer from "multer";
+import { allowedExtensions } from "../utilities/allowedExtensions.js";
+import CustomError from "../utilities/customError.js";
 
 export const multerCloudFunction = (allowedExtensionsArr) => {
+
   if (!allowedExtensionsArr) {
-    allowedExtensionsArr = allowedExtensions.Image
+    allowedExtensionsArr = allowedExtensions.Image;
   }
-  //================================== Storage =============================
-  const storage = multer.memoryStorage();  // Use memory storage to handle file buffer directly
 
-  //================================== File Filter =============================
-  const fileFilter = function (req, file, cb) {
-    if (allowedExtensionsArr.includes(file.mimetype)) {
-      return cb(null, true)
+  const storage = multer.memoryStorage();
+
+  const fileFilter = (req, file, cb) => {
+ 
+    const isMimeAllowed = allowedExtensionsArr.includes(file.mimetype);
+
+    const isPdfByName =
+      file.originalname.toLowerCase().endsWith(".pdf");
+
+    if (isMimeAllowed || isPdfByName) {
+      return cb(null, true);
     }
-    cb(new Error('invalid extension', { cause: 400 }), false)
-  }
 
-  const fileUpload = multer({
-    fileFilter,
+    return cb(
+      new CustomError("invalid extension", 400),
+      false
+    );
+  };
+
+  return multer({
     storage,
-  })
-  return fileUpload
-}
+    fileFilter,
+  });
+};

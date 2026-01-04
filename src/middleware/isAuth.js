@@ -10,9 +10,7 @@ export const isAuth = (roles) => {
         return next(new CustomError('Please login first',  400 ))
       }
 
-    //   if (!authorization.startsWith('technova__')) {
-    //     return next(new Error('invalid token prefix', { cause: 400 }))
-    //   }
+
     console.log(authorization);
       
       const splitedToken = authorization.split(' ')[1]

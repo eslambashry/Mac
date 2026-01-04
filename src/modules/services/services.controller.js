@@ -10,6 +10,8 @@ export const createService = async (req, res, next) => {
     const {
       header_title_en,
       header_title_ar,
+      header_sub_title_en,
+      header_sub_title_ar,
       header_description_en,
       header_description_ar,
       services // array of service items
@@ -53,11 +55,11 @@ export const createService = async (req, res, next) => {
       if (!file) {
         return next(new CustomError(`Image is required for service #${i + 1}`, 400));
       }
-
+      const customId = nanoid()
       const uploadResult = await imagekit.upload({
         file: file.buffer,
         fileName: file.originalname,
-        folder: `${process.env.PROJECT_FOLDER}/Services/${nanoid()}`,
+        folder: `${process.env.PROJECT_FOLDER}/Services/${customId}`,
       });
 
       uploadedServices.push({
@@ -66,7 +68,8 @@ export const createService = async (req, res, next) => {
         image: {
           imageLink: uploadResult.url,
           public_id: uploadResult.fileId,
-        }
+        },
+        customId:customId
       });
     }
 
@@ -81,6 +84,8 @@ export const createService = async (req, res, next) => {
         header: {
           title_en: header_title_en,
           title_ar: header_title_ar,
+          sub_title_en:header_sub_title_en,
+          sub_title_ar:header_sub_title_ar,
           description_en: header_description_en,
           description_ar: header_description_ar,
         },

@@ -11,6 +11,8 @@ import { globalResponse } from "./src/middleware/ErrorHandeling.js";
 
 import { fileURLToPath } from "url";
 import contactRoute from "./src/modules/contact_us/contact.routes.js";
+import careerRouter from "./src/modules/careers/careers.router.js";
+import applicationRouter from "./src/modules/applications/applications.router.js";
 
 const app = express()
 const port = process.env.PORT
@@ -21,6 +23,9 @@ app.use(express.json());
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/services', servicesRouter)
 app.use('/api/v1/contact', contactRoute)
+app.use('/api/v1/career', careerRouter)
+app.use('/api/v1/applications', applicationRouter)
+
 app.use(globalResponse);
 DB
 
