@@ -15,7 +15,7 @@ const serviceItemSchema = new Schema(
       imageLink: String,
       public_id: String,
     },
-
+    customId:String,
     order: Number,
   },
   { _id: false }
@@ -30,6 +30,14 @@ const serviceSectionSchema = new Schema(
         required: true,
       },
       title_ar: {
+        type: String,
+        required: true,
+      },
+      sub_title_en: {
+        type: String,
+        required: true,
+      },
+      sub_title_ar: {
         type: String,
         required: true,
       },
