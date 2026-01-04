@@ -51,13 +51,13 @@ const swaggerSpec = swaggerJSDoc({
       },
     ],
   },
-apis: [
-  path.join(__dirname, "./src/modules/services/services.router.js"),
-  path.join(__dirname, "./src/modules/auth/auth.routes.js"),
-  path.join(__dirname, "./src/modules/contact_us/contact.routes.js"),
-  path.join(__dirname, "./src/modules/careers/careers.routes.js"),
-  path.join(__dirname, "./src/modules/applications/applications.routes.js")
-]
+  apis: [
+    path.join(__dirname, "./src/modules/services/services.router.js"),
+    path.join(__dirname, "./src/modules/auth/auth.routes.js"),
+    path.join(__dirname, "./src/modules/contact_us/contact.routes.js"),
+    path.join(__dirname, "./src/modules/careers/careers.router.js"),
+    path.join(__dirname, "./src/modules/applications/applications.router.js")
+  ]
 });
 
 
