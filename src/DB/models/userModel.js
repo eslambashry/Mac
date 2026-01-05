@@ -5,7 +5,7 @@ const userSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    phone:{type:String},
+    phone: { type: String },
     createdAt: { type: Date, default: Date.now },
     image: {
         imageLink: { type: String },
@@ -13,9 +13,9 @@ const userSchema = new Schema({
     },
     token: { type: String },
     isActive: { type: Boolean, default: true },
-    customId: { type: String  }
-},{ timestamps: true })
+    customId: { type: String },
+    forgetCode: { type: String }
+}, { timestamps: true })
 
 export const UserModel = model("User", userSchema)
 
- 

@@ -7,15 +7,15 @@ export const isAuth = (roles) => {
     try {
       const { authorization } = req.headers
       if (!authorization) {
-        return next(new CustomError('Please login first',  400 ))
+        return next(new CustomError('Please login first', 401))
       }
 
 
-    console.log(authorization);
-      
+      console.log(authorization);
+
       const splitedToken = authorization.split(' ')[1]
       // console.log(splitedToken);
-      
+
       try {
         const decodedData = verifyToken({
           token: splitedToken,
@@ -23,21 +23,21 @@ export const isAuth = (roles) => {
         })
         // console.log("decodedData: ",decodedData);
         // console.log("decodedData: ",decodedData._id);
-        
+
         const findUser = await UserModel.findById(
           decodedData._id,
           'email userName role',
         )
-             
-        
+
+
         if (!findUser) {
-          return next(new CustomError('Please SignUp',  400 ))
+          return next(new CustomError('Please SignUp', 401))
         }
         // console.log(roles);
         // console.log(findUser.role);
         // ~ Authorization error
-        if(!roles.includes(findUser.role)){
-          return next(new CustomError('UnAuthorized to access this api',  400 ))
+        if (!roles.includes(findUser.role)) {
+          return next(new CustomError('UnAuthorized to access this api', 403))
         }
         req.authUser = findUser
         next()
@@ -47,7 +47,7 @@ export const isAuth = (roles) => {
           // refresh token
           const user = await UserModel.findOne({ token: splitedToken })
           if (!user) {
-            return next(new CustomError('Wrong Token - Token not found in user data',  400 ))
+            return next(new CustomError('Wrong Token - Token not found in user data', 400))
           }
           // generate new token
           const userToken = generateToken({
@@ -60,7 +60,7 @@ export const isAuth = (roles) => {
           })
 
           if (!userToken) {
-            return next(new CustomError('token generation fail, payload canot be empty',  400 ))
+            return next(new CustomError('token generation fail, payload canot be empty', 400))
           }
 
           // user.token = userToken
@@ -71,11 +71,11 @@ export const isAuth = (roles) => {
           )
           return res.status(401).json({ message: 'Token refreshed', userToken })
         }
-        return next(new CustomError('invalid token',  500 ))
+        return next(new CustomError('invalid token', 500))
       }
     } catch (error) {
       console.log(error)
-      next(new CustomError('catch error in auth',  500 ))
+      next(new CustomError('catch error in auth', 500))
     }
   }
 }

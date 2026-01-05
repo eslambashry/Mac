@@ -123,7 +123,7 @@ userRouter.get('/:id', userCon.getOneUsers);
  *       201:
  *         description: User added successfully
  */
-userRouter.post('/add', userCon.addUser);
+userRouter.post('/add', multerCloudFunction(allowedExtensions.Image).single("image"), userCon.addUser);
 
 /**
  * @swagger

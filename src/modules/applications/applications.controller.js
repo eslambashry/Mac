@@ -60,36 +60,36 @@ export const applyForCareer = async (req, res, next) => {
   }
 };
 
-export const getAllApplications = async(req,res,next) =>{
-    const applications = await applicationsModel.find()
-    if(!applications){
-        return next(new CustomError("No applications found"))
-    }
-    res.status(201).json({
-        success:true,
-        message:"Applications retrive successfully",
-        count: applications.length,
-        applications
-    })
+export const getAllApplications = async (req, res, next) => {
+  const applications = await applicationsModel.find()
+  if (!applications) {
+    return next(new CustomError("No applications found"))
+  }
+  res.status(201).json({
+    success: true,
+    message: "Applications retrive successfully",
+    count: applications.length,
+    applications
+  })
 }
 
-export const getSingleCareerApplications = async(req,res,next) =>{
-   const { id: careerId } = req.params
-    const applications = await applicationsModel.
-    find({career:careerId}).
+export const getSingleCareerApplications = async (req, res, next) => {
+  const { id: careerId } = req.params
+  const applications = await applicationsModel.
+    find({ career: careerId }).
     populate("career", "title_en title_ar department_en department_ar location_en location_ar employmentType_en employmentType_ar").
     sort({ createdAt: -1 }); // newest first
 
-    if (applications.length === 0) {
-      return next(new CustomError("No applications found for this job", 404));
-    }
-    
-    res.status(201).json({
-        success:true,
-        message:"Applications retrive successfully",
-        count: applications.length,
-        applications
-    })
+  if (applications.length === 0) {
+    return next(new CustomError("No applications found for this job", 404));
+  }
+
+  res.status(201).json({
+    success: true,
+    message: "Applications retrive successfully",
+    count: applications.length,
+    applications
+  })
 }
 
 export const getSingleApplication = async (req, res, next) => {
@@ -114,6 +114,7 @@ export const getSingleApplication = async (req, res, next) => {
 export const updateApplicationStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
+    console.log("updateApplicationStatus request:", { id: req.params.id, body: req.body, status });
 
     const application = await applicationsModel.findById(req.params.id);
     if (!application) {
@@ -129,6 +130,7 @@ export const updateApplicationStatus = async (req, res, next) => {
       application,
     });
   } catch (error) {
+    console.error("updateApplicationStatus Error:", error);
     next(error);
   }
 };

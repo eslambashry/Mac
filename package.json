@@ -19,7 +19,7 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "start": "nodemone src/app.js",
+    "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

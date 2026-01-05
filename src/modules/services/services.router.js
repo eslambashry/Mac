@@ -50,11 +50,11 @@ servicesRouter.post(
   multerCloudFunction(allowedExtensions.Image).any(),
   servicesCon.createService
 );
-    
+
 servicesRouter.put(
-    "/:id",
-    multerCloudFunction(allowedExtensions.Image).array("image", 5),
-    servicesCon.updateService
+  "/:id",
+  multerCloudFunction(allowedExtensions.Image).array("image", 5),
+  servicesCon.updateService
 );
 
 /**
@@ -67,7 +67,7 @@ servicesRouter.put(
  *       200:
  *         description: List of all services
  */
-servicesRouter.get("/",servicesCon.getAllServices);
+servicesRouter.get("/", servicesCon.getAllServices);
 
 /**
  * @swagger
@@ -79,7 +79,7 @@ servicesRouter.get("/",servicesCon.getAllServices);
  *       200:
  *         description: List of all Arabic services
  */
-servicesRouter.get("/ar",servicesCon.getAllArabicServices);
+servicesRouter.get("/ar", servicesCon.getAllArabicServices);
 
 /**
  * @swagger
@@ -91,7 +91,7 @@ servicesRouter.get("/ar",servicesCon.getAllArabicServices);
  *       200:
  *         description: List of all English services
  */
-servicesRouter.get("/en",servicesCon.getAllEnglishServices);
+servicesRouter.get("/en", servicesCon.getAllEnglishServices);
 
 
 
@@ -113,7 +113,7 @@ servicesRouter.get("/en",servicesCon.getAllEnglishServices);
  *       200:
  *         description: Service data
  */
-servicesRouter.get("/:id",servicesCon.getServiceById);
+servicesRouter.get("/:id", servicesCon.getServiceById);
 
 
 
@@ -176,10 +176,28 @@ servicesRouter.get("/:id",servicesCon.getServiceById);
  *         description: Service deleted successfully
  */
 
-servicesRouter.delete("/:id",servicesCon.deleteService);
+servicesRouter.delete("/:id", servicesCon.deleteService);
+
+// 🔹 Service Items Management
+servicesRouter.post(
+  "/:id/items",
+  multerCloudFunction(allowedExtensions.Image).single("image"),
+  servicesCon.addServiceItem
+);
+
+servicesRouter.put(
+  "/:id/items/:itemId",
+  multerCloudFunction(allowedExtensions.Image).single("image"),
+  servicesCon.updateServiceItem
+);
+
+servicesRouter.delete(
+  "/:id/items/:itemId",
+  servicesCon.deleteServiceItem
+);
 
 
-servicesRouter.post("/multy",servicesCon.multyDeleteServices);
+servicesRouter.post("/multy", servicesCon.multyDeleteServices);
 
 
 
@@ -220,9 +238,9 @@ servicesRouter.post("/multy",servicesCon.multyDeleteServices);
  */
 
 servicesRouter.post(
-    "/review/:id", 
-    multerCloudFunction(allowedExtensions.Image).array("screenShots", 3),
-    servicesCon.createServiceReview
+  "/review/:id",
+  multerCloudFunction(allowedExtensions.Image).array("screenShots", 3),
+  servicesCon.createServiceReview
 );
 
 export default servicesRouter;
