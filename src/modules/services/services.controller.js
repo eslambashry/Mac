@@ -217,7 +217,12 @@ export const updateService = async (req, res, next) => {
       isActive
     } = req.body;
 
-    // Use dot notation for nested fields update without overwriting the whole object
+    const service = await serviceModel.findById(id);
+    if (!service) {
+      return next(new CustomError("Service section not found", 404));
+    }
+
+    // Use dot notation for nested fields update
     const updateData = {};
     if (title_en) updateData["header.title_en"] = title_en;
     if (title_ar) updateData["header.title_ar"] = title_ar;
@@ -227,20 +232,47 @@ export const updateService = async (req, res, next) => {
     if (description_ar) updateData["header.description_ar"] = description_ar;
     if (isActive !== undefined) updateData["isActive"] = isActive;
 
-    const service = await serviceModel.findByIdAndUpdate(
+    // Handle Main Image Upload
+    if (req.files && req.files.length > 0) {
+      const mainImageFile = req.files.find(f => f.fieldname === 'mainImage');
+      if (mainImageFile) {
+        // Delete old image if exists
+        if (service.header.image?.public_id) {
+          await destroyImage(service.header.image.public_id);
+        }
+
+        // We need a customId for folder structure. Service sections don't explicitly have one in schema root? 
+        // Wait, items have customId. Section might not. Let's create one or reuse if we can find a pattern.
+        // Or store in 'Services/HeaderImages' etc.
+        // Let's check if we can get a customId from the service or generated.
+        // The previous create logic didn't save customId.
+        // Let's use a generic folder or create a customId on the fly if we want to organize.
+        // For now, let's use `Services/Headers/${id}` to enable cleanup.
+        const customId = nanoid(); // Just a random suffix for folder if needed.
+
+        const uploadResult = await imagekit.upload({
+          file: mainImageFile.buffer,
+          fileName: mainImageFile.originalname,
+          folder: `${process.env.PROJECT_FOLDER}/Services/Headers`,
+        });
+
+        updateData["header.image"] = {
+          imageLink: uploadResult.url,
+          public_id: uploadResult.fileId,
+        };
+      }
+    }
+
+    const updatedService = await serviceModel.findByIdAndUpdate(
       id,
       { $set: updateData },
       { new: true }
     );
 
-    if (!service) {
-      return next(new CustomError("Service section not found", 404));
-    }
-
     return res.status(200).json({
       success: true,
       message: "Service section updated successfully",
-      data: service,
+      data: updatedService,
     });
   } catch (err) {
     next(err);
@@ -440,6 +472,11 @@ export const deleteService = async (req, res, next) => {
       if (item.image?.public_id) {
         await destroyImage(item.image.public_id);
       }
+    }
+
+    // Delete Header Image
+    if (serviceSection.header?.image?.public_id) {
+      await destroyImage(serviceSection.header.image.public_id);
     }
 
     await serviceModel.findByIdAndDelete(id);

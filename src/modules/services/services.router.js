@@ -53,7 +53,7 @@ servicesRouter.post(
 
 servicesRouter.put(
   "/:id",
-  multerCloudFunction(allowedExtensions.Image).array("image", 5),
+  multerCloudFunction(allowedExtensions.Image).any(),
   servicesCon.updateService
 );
 

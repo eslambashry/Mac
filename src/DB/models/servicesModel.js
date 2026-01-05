@@ -1,4 +1,4 @@
-import {Schema,model} from "mongoose";
+import { Schema, model } from "mongoose";
 
 const serviceItemSchema = new Schema(
   {
@@ -15,7 +15,7 @@ const serviceItemSchema = new Schema(
       imageLink: String,
       public_id: String,
     },
-    customId:String,
+    customId: String,
     order: Number,
   },
   { _id: false }
@@ -48,6 +48,10 @@ const serviceSectionSchema = new Schema(
       description_ar: {
         type: String,
         required: true,
+      },
+      image: {
+        imageLink: String,
+        public_id: String,
       }
     },
 
