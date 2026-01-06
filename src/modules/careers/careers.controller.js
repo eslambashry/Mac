@@ -271,7 +271,3 @@ export const toggleCareerStatus = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
-

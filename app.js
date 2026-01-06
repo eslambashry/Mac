@@ -18,7 +18,14 @@ const app = express()
 const port = process.env.PORT
 
 app.use(morgan("dev"));
-app.use(cors())
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/services', servicesRouter)
