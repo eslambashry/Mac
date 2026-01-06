@@ -18,7 +18,7 @@ const serviceItemSchema = new Schema(
     customId: String,
     order: Number,
   },
-  { _id: false }
+  { timestamps: false }
 );
 
 const serviceSectionSchema = new Schema(

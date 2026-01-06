@@ -61,13 +61,16 @@ export const applyForCareer = async (req, res, next) => {
 };
 
 export const getAllApplications = async (req, res, next) => {
-  const applications = await applicationsModel.find()
+  const applications = await applicationsModel
+    .find()
+    .populate("career", "title_en title_ar")
+    .sort({ createdAt: -1 });
   if (!applications) {
     return next(new CustomError("No applications found"))
   }
-  res.status(201).json({
+  res.status(200).json({
     success: true,
-    message: "Applications retrive successfully",
+    message: "Applications retrieved successfully",
     count: applications.length,
     applications
   })

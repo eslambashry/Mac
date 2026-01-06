@@ -8,94 +8,129 @@ import imagekit, { destroyImage } from "../../utilities/imagekitConfigration.js"
 export const createService = async (req, res, next) => {
   try {
     const {
-      header_title_en,
-      header_title_ar,
-      header_sub_title_en,
-      header_sub_title_ar,
-      header_description_en,
-      header_description_ar,
-      services // array of service items
+      title_en,
+      title_ar,
+      sub_title_en,
+      sub_title_ar,
+      description_en,
+      description_ar,
+      isActive,
+      services // array of service items (optional now)
     } = req.body;
 
     // 🔴 Validate header
     if (
-      !header_title_en ||
-      !header_title_ar ||
-      !header_description_en ||
-      !header_description_ar
+      !title_en ||
+      !title_ar ||
+      !sub_title_en ||
+      !sub_title_ar ||
+      !description_en ||
+      !description_ar
     ) {
-      return next(new CustomError("Service section header is required", 400));
+      return next(new CustomError("Service section header is required (all fields)", 400));
     }
 
-    // 🔴 Validate services array
-    if (!services || !Array.isArray(services) || services.length === 0) {
-      return next(new CustomError("At least one service is required", 400));
-    }
-
-    // 🔹 Prepare service items
+    // � Prepare service items if any
     const uploadedServices = [];
+    if (services && Array.isArray(services) && services.length > 0) {
+      // Filter out mainImage from files to avoid index confusion if mixed
+      // Assuming service images are unnamed or named sequentially? 
+      // The original code used req.files[i]. 
+      // We'll filter out 'mainImage' first.
+      const serviceFiles = req.files ? req.files.filter(f => f.fieldname !== 'mainImage') : [];
 
-    for (let i = 0; i < services.length; i++) {
-      const s = services[i];
+      for (let i = 0; i < services.length; i++) {
+        const s = services[i];
 
-      if (
-        !s.title_en ||
-        !s.title_ar ||
-        !s.category_en ||
-        !s.category_ar ||
-        !s.description_en ||
-        !s.description_ar ||
-        !s.order
-      ) {
-        return next(new CustomError(`All fields are required for service #${i + 1}`, 400));
+        if (
+          !s.title_en ||
+          !s.title_ar ||
+          !s.category_en ||
+          !s.category_ar ||
+          !s.description_en ||
+          !s.description_ar ||
+          !s.order
+        ) {
+          return next(new CustomError(`All fields are required for service #${i + 1}`, 400));
+        }
+
+        // 🔹 Handle image
+        const file = serviceFiles[i];
+        if (!file) {
+          return next(new CustomError(`Image is required for service #${i + 1}`, 400));
+        }
+        const customId = nanoid()
+        const uploadResult = await imagekit.upload({
+          file: file.buffer,
+          fileName: file.originalname,
+          folder: `${process.env.PROJECT_FOLDER}/Services/${customId}`,
+        });
+
+        uploadedServices.push({
+          ...s,
+          order: Number(s.order),
+          image: {
+            imageLink: uploadResult.url,
+            public_id: uploadResult.fileId,
+          },
+          customId: customId
+        });
       }
+    }
 
-      // 🔹 Handle image
-      const file = req.files[i]; // assuming images are uploaded as array with same order
-      if (!file) {
-        return next(new CustomError(`Image is required for service #${i + 1}`, 400));
-      }
-      const customId = nanoid()
-      const uploadResult = await imagekit.upload({
-        file: file.buffer,
-        fileName: file.originalname,
-        folder: `${process.env.PROJECT_FOLDER}/Services/${customId}`,
-      });
-
-      uploadedServices.push({
-        ...s,
-        order: Number(s.order),
-        image: {
+    // 🔹 Handle Header Image
+    let headerImage = {};
+    if (req.files && req.files.length > 0) {
+      const mainImageFile = req.files.find(f => f.fieldname === 'mainImage');
+      if (mainImageFile) {
+        const customId = nanoid();
+        const uploadResult = await imagekit.upload({
+          file: mainImageFile.buffer,
+          fileName: mainImageFile.originalname,
+          folder: `${process.env.PROJECT_FOLDER}/Services/Headers`,
+        });
+        headerImage = {
           imageLink: uploadResult.url,
-          public_id: uploadResult.fileId,
-        },
-        customId: customId
-      });
+          public_id: uploadResult.fileId
+        };
+      }
     }
 
     // 🔹 Check if section exists
-    let serviceSection = await serviceModel.findOne({ "header.title_en": header_title_en });
+    let serviceSection = await serviceModel.findOne({ "header.title_en": title_en });
 
     if (serviceSection) {
-      serviceSection.services.push(...uploadedServices);
-      await serviceSection.save();
+      // Update header info if it exists? Or just append services?
+      // Original logic just appended services. 
+      // But if we are "Creating" and passing header info, we probably want to ensure it's set?
+      // For now, let's stick to original behavior of appending services, 
+      // BUT we should probably return an error if we try to create a duplicate header title without services.
+      // However, to be safe and flexible:
+      if (uploadedServices.length > 0) {
+        serviceSection.services.push(...uploadedServices);
+        await serviceSection.save();
+      } else {
+        return next(new CustomError("Service section with this title already exists", 400));
+      }
     } else {
       serviceSection = await serviceModel.create({
         header: {
-          title_en: header_title_en,
-          title_ar: header_title_ar,
-          sub_title_en: header_sub_title_en,
-          sub_title_ar: header_sub_title_ar,
-          description_en: header_description_en,
-          description_ar: header_description_ar,
+          title_en,
+          title_ar,
+          sub_title_en,
+          sub_title_ar,
+          description_en,
+          description_ar,
+          image: headerImage
         },
         services: uploadedServices,
+        isActive: isActive !== undefined ? isActive : true
       });
     }
 
     return res.status(201).json({
       success: true,
-      message: "Services created successfully",
+      message: "Services created/updated successfully",
       data: serviceSection
     });
 
@@ -366,7 +401,7 @@ export const updateServiceItem = async (req, res, next) => {
       return next(new CustomError("Service section not found", 404));
     }
 
-    const itemIndex = serviceSection.services.findIndex(s => s._id.toString() === itemId);
+    const itemIndex = serviceSection.services.findIndex(s => s._id && s._id.toString() === itemId);
     if (itemIndex === -1) {
       return next(new CustomError("Service item not found", 404));
     }
@@ -432,7 +467,7 @@ export const deleteServiceItem = async (req, res, next) => {
       return next(new CustomError("Service section not found", 404));
     }
 
-    const item = serviceSection.services.find(s => s._id.toString() === itemId);
+    const item = serviceSection.services.find(s => s._id && s._id.toString() === itemId);
     if (!item) {
       return next(new CustomError("Service item not found", 404));
     }
@@ -443,7 +478,7 @@ export const deleteServiceItem = async (req, res, next) => {
     }
 
     // Remove item from array
-    serviceSection.services = serviceSection.services.filter(s => s._id.toString() !== itemId);
+    serviceSection.services = serviceSection.services.filter(s => s._id && s._id.toString() !== itemId);
     await serviceSection.save();
 
     return res.status(200).json({
