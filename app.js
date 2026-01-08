@@ -13,6 +13,7 @@ import { fileURLToPath } from "url";
 import contactRoute from "./src/modules/contact_us/contact.routes.js";
 import careerRouter from "./src/modules/careers/careers.router.js";
 import applicationRouter from "./src/modules/applications/applications.router.js";
+import statisticsRouter from "./src/modules/statistics/statistics.router.js";
 
 const app = express()
 const port = process.env.PORT
@@ -32,6 +33,7 @@ app.use('/api/v1/services', servicesRouter)
 app.use('/api/v1/contact', contactRoute)
 app.use('/api/v1/careers', careerRouter)
 app.use('/api/v1/applications', applicationRouter)
+app.use('/api/v1/statistics', statisticsRouter)
 
 app.use(globalResponse);
 DB
@@ -47,7 +49,7 @@ const swaggerSpec = swaggerJSDoc({
       version: "1.0.0",
       description: "API documentation for the MACC backend services",
     },
-     servers: [
+    servers: [
       {
         url: "http://localhost:8080/",
         description: "Local Server",
@@ -63,7 +65,8 @@ const swaggerSpec = swaggerJSDoc({
     path.join(__dirname, "./src/modules/auth/auth.routes.js"),
     path.join(__dirname, "./src/modules/contact_us/contact.routes.js"),
     path.join(__dirname, "./src/modules/careers/careers.router.js"),
-    path.join(__dirname, "./src/modules/applications/applications.router.js")
+    path.join(__dirname, "./src/modules/applications/applications.router.js"),
+    path.join(__dirname, "./src/modules/statistics/statistics.router.js")
   ]
 });
 
@@ -113,5 +116,5 @@ app.get("/swagger.json", (req, res) => {
 });
 
 
-app.get('/', (req, res) => res.send('Welcome 💱')) 
+app.get('/', (req, res) => res.send('Welcome 💱'))
 app.listen(port, () => console.log(`App Runing On Port 8️⃣ 0️⃣ 8️⃣ 0️⃣ 🔗`.bold.underline.yellow))

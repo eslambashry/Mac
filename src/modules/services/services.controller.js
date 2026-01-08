@@ -39,6 +39,18 @@ export const createService = async (req, res, next) => {
       // We'll filter out 'mainImage' first.
       const serviceFiles = req.files ? req.files.filter(f => f.fieldname !== 'mainImage') : [];
 
+      // 🔴 Check for duplicate orders in the payload itself
+      const orderCounts = {};
+      for (const s of services) {
+        if (s.order < 1) {
+          return next(new CustomError(`Order must be at least 1. Invalid order for service: ${s.title_en || 'Unknown'}`, 400));
+        }
+        if (orderCounts[s.order]) {
+          return next(new CustomError(`Duplicate order number ${s.order} in the request payload`, 400));
+        }
+        orderCounts[s.order] = true;
+      }
+
       for (let i = 0; i < services.length; i++) {
         const s = services[i];
 
@@ -107,6 +119,13 @@ export const createService = async (req, res, next) => {
       // BUT we should probably return an error if we try to create a duplicate header title without services.
       // However, to be safe and flexible:
       if (uploadedServices.length > 0) {
+        // Check for conflicts with existing services
+        const existingOrders = new Set(serviceSection.services.map(s => s.order));
+        for (const newService of uploadedServices) {
+          if (existingOrders.has(newService.order)) {
+            return next(new CustomError(`Order number ${newService.order} is already taken by an existing service in this section`, 400));
+          }
+        }
         serviceSection.services.push(...uploadedServices);
         await serviceSection.save();
       } else {
@@ -344,6 +363,17 @@ export const addServiceItem = async (req, res, next) => {
     // Ah, it saved it on the Item. Let's look at schema...
     // Schema: services: [ { customId: String ... } ]
 
+    const checkOrder = Number(order);
+    if (checkOrder < 1) {
+      return next(new CustomError("Order must be at least 1", 400));
+    }
+
+    // Check if order exists
+    const existingOrder = serviceSection.services.find(s => s.order === checkOrder);
+    if (existingOrder) {
+      return next(new CustomError(`Order number ${order} is already taken by another service in this section`, 400));
+    }
+
     const customId = nanoid();
     const folderPath = `${process.env.PROJECT_FOLDER}/Services/${customId}`;
 
@@ -415,7 +445,18 @@ export const updateServiceItem = async (req, res, next) => {
     if (category_ar) item.category_ar = category_ar;
     if (description_en) item.description_en = description_en;
     if (description_ar) item.description_ar = description_ar;
-    if (order !== undefined) item.order = Number(order);
+    if (order !== undefined) {
+      const newOrder = Number(order);
+      if (newOrder < 1) {
+        return next(new CustomError("Order must be at least 1", 400));
+      }
+      // Check if another item has this order
+      const conflict = serviceSection.services.find(s => s.order === newOrder && s._id.toString() !== itemId);
+      if (conflict) {
+        return next(new CustomError(`Order number ${newOrder} is already taken by another service in this section`, 400));
+      }
+      item.order = newOrder;
+    }
 
     // Handle Image Update
     if (req.file) {
