@@ -159,3 +159,32 @@ export const deleteApplication = async (req, res, next) => {
     next(error);
   }
 };
+
+export const bulkDeleteApplications = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return next(new CustomError("Invalid IDs provided", 400));
+    }
+
+    const applications = await applicationsModel.find({ _id: { $in: ids } });
+
+    if (applications.length === 0) {
+      return next(new CustomError("No applications found to delete", 404));
+    }
+
+    for (const app of applications) {
+      if (app.cv?.public_id) {
+        await imagekit.deleteFile(app.cv.public_id);
+      }
+      await app.deleteOne();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `${applications.length} applications deleted successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

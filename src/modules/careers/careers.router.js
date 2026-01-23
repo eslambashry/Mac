@@ -73,7 +73,7 @@ const careerRouter = Router()
  *       201:
  *         description: Career created successfully
  */
-careerRouter.post('/create',isAuth(systemRoles.ADMIN),careerCon.createCareer)
+careerRouter.post('/create', isAuth(systemRoles.ADMIN), careerCon.createCareer)
 
 /**
  * @swagger
@@ -108,7 +108,7 @@ careerRouter.post('/create',isAuth(systemRoles.ADMIN),careerCon.createCareer)
  *       200:
  *         description: List of careers
  */
-careerRouter.get('/',careerCon.getAllCareers)
+careerRouter.get('/', careerCon.getAllCareers)
 
 /**
  * @swagger
@@ -129,7 +129,7 @@ careerRouter.get('/',careerCon.getAllCareers)
  *       404:
  *         description: Career not found
  */
-careerRouter.get('/one/:id',careerCon.getOneCareer)
+careerRouter.get('/one/:id', careerCon.getOneCareer)
 
 /**
  * @swagger
@@ -141,7 +141,7 @@ careerRouter.get('/one/:id',careerCon.getOneCareer)
  *       200:
  *         description: List of Arabic careers
  */
-careerRouter.get('/ar',careerCon.getAllArabicCareer)
+careerRouter.get('/ar', careerCon.getAllArabicCareer)
 
 /**
  * @swagger
@@ -153,7 +153,7 @@ careerRouter.get('/ar',careerCon.getAllArabicCareer)
  *       200:
  *         description: List of English careers
  */
-careerRouter.get('/en',careerCon.getAllEnglishCareer)
+careerRouter.get('/en', careerCon.getAllEnglishCareer)
 
 /**
  * @swagger
@@ -219,7 +219,7 @@ careerRouter.get('/en',careerCon.getAllEnglishCareer)
  *       404:
  *         description: Career not found
  */
-careerRouter.put("/:id",isAuth(systemRoles.ADMIN), careerCon.updateCareer);
+careerRouter.put("/:id", isAuth(systemRoles.ADMIN), careerCon.updateCareer);
 
 /**
  * @swagger
@@ -242,6 +242,61 @@ careerRouter.put("/:id",isAuth(systemRoles.ADMIN), careerCon.updateCareer);
  *       404:
  *         description: Career not found
  */
-careerRouter.patch("/:id/toggle",isAuth(systemRoles.ADMIN), careerCon.toggleCareerStatus);
+careerRouter.patch("/:id/toggle", isAuth(systemRoles.ADMIN), careerCon.toggleCareerStatus);
+
+/**
+ * @swagger
+ * /api/v1/careers/{id}:
+ *   delete:
+ *     summary: Delete a career
+ *     tags: [Careers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Career ID
+ *     responses:
+ *       200:
+ *         description: Career deleted successfully
+ *       404:
+ *         description: Career not found
+ */
+careerRouter.delete("/:id", isAuth(systemRoles.ADMIN), careerCon.deleteCareer);
+
+/**
+ * @swagger
+ * /api/v1/careers/bulk-delete:
+ *   post:
+ *     summary: Bulk delete careers
+ *     tags: [Careers]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ids
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of career IDs to delete
+ *     responses:
+ *       200:
+ *         description: Careers deleted successfully
+ *       400:
+ *         description: Invalid request - IDs array required
+ *       404:
+ *         description: No careers found for the provided IDs
+ */
+careerRouter.post("/bulk-delete", isAuth(systemRoles.ADMIN), careerCon.bulkDeleteCareers);
 
 export default careerRouter

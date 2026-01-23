@@ -133,43 +133,43 @@ export const getAllCareers = async (req, res, next) => {
   }
 };
 
-export const getOneCareer = async (req,res,next) => {
-    const id = req.params.id
-    const careers = await careerModel.findById(id)
-    if(!careers) {
-        return next(new CustomError("No Careers Found", 404));
-    }
-    res.status(201).json({
-      success: true,
-      message: "Career return successfully",
-      careers: careers,
-    })
+export const getOneCareer = async (req, res, next) => {
+  const id = req.params.id
+  const careers = await careerModel.findById(id)
+  if (!careers) {
+    return next(new CustomError("No Careers Found", 404));
+  }
+  res.status(201).json({
+    success: true,
+    message: "Career return successfully",
+    careers: careers,
+  })
 }
 
-export const getAllArabicCareer = async (req,res,next) => {
-    
-    const careers = await careerModel.find().select('title_ar department_ar location_ar employmentType_ar shortDescription_ar description_ar responsibilities_ar requirements_ar')
-    if(!careers) {
-        return next(new CustomError("No Careers Found", 404));
-    }
-    res.status(201).json({
-      success: true,
-      message: "Career return successfully",
-      careers: careers,
-    })
+export const getAllArabicCareer = async (req, res, next) => {
+
+  const careers = await careerModel.find().select('title_ar department_ar location_ar employmentType_ar shortDescription_ar description_ar responsibilities_ar requirements_ar')
+  if (!careers) {
+    return next(new CustomError("No Careers Found", 404));
+  }
+  res.status(201).json({
+    success: true,
+    message: "Career return successfully",
+    careers: careers,
+  })
 }
 
-export const getAllEnglishCareer = async (req,res,next) => {
-    
-    const careers = await careerModel.find().select('title_en department_en location_en employmentType_en shortDescription_en description_en responsibilities_en requirements_en')
-    if(!careers) {
-        return next(new CustomError("No Careers Found", 404));
-    }
-    res.status(201).json({
-      success: true,
-      message: "Career return successfully",
-      careers: careers,
-    })
+export const getAllEnglishCareer = async (req, res, next) => {
+
+  const careers = await careerModel.find().select('title_en department_en location_en employmentType_en shortDescription_en description_en responsibilities_en requirements_en')
+  if (!careers) {
+    return next(new CustomError("No Careers Found", 404));
+  }
+  res.status(201).json({
+    success: true,
+    message: "Career return successfully",
+    careers: careers,
+  })
 }
 
 export const updateCareer = async (req, res, next) => {
@@ -266,6 +266,56 @@ export const toggleCareerStatus = async (req, res, next) => {
       success: true,
       message: "Career status updated",
       career,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ~ Delete Career
+export const deleteCareer = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const career = await careerModel.findById(id);
+
+    if (!career) {
+      return next(new CustomError("Career not found", 404));
+    }
+
+    await careerModel.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Career deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ~ Bulk Delete Careers
+export const bulkDeleteCareers = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return next(new CustomError("Please provide an array of IDs to delete", 400));
+    }
+
+    const careers = await careerModel.find({ _id: { $in: ids } });
+
+    if (careers.length === 0) {
+      return next(new CustomError("No careers found for the provided IDs", 404));
+    }
+
+    for (const career of careers) {
+      await careerModel.findByIdAndDelete(career._id);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `${careers.length} career(s) deleted successfully`,
+      deletedCount: careers.length,
     });
   } catch (error) {
     next(error);

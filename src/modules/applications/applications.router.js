@@ -177,4 +177,36 @@ applicationRouter.patch('/:id/status', isAuth(systemRoles.ADMIN), applicationCon
  */
 applicationRouter.delete('/:id', isAuth(systemRoles.ADMIN), applicationCon.deleteApplication)
 
+/**
+ * @swagger
+ * /api/v1/applications/bulk-delete:
+ *   post:
+ *     summary: Bulk delete applications
+ *     tags: [Applications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ids
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of Application IDs to delete
+ *     responses:
+ *       200:
+ *         description: Applications deleted successfully
+ *       400:
+ *         description: Invalid IDs provided
+ *       404:
+ *         description: No applications found to delete
+ */
+applicationRouter.post('/bulk-delete', isAuth(systemRoles.ADMIN), applicationCon.bulkDeleteApplications)
+
 export default applicationRouter;
