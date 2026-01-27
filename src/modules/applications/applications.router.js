@@ -64,6 +64,46 @@ applicationRouter.post(
 
 /**
  * @swagger
+ * /api/v1/applications/apply-general:
+ *   post:
+ *     summary: Apply for general position (without specific career)
+ *     tags: [Applications]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullName
+ *               - email
+ *               - phone
+ *               - cv
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               cv:
+ *                 type: string
+ *                 format: binary
+ *                 description: CV Document (PDF, DOC, DOCX)
+ *     responses:
+ *       201:
+ *         description: Application submitted successfully
+ *       400:
+ *         description: Missing fields or file
+ */
+applicationRouter.post(
+  "/apply-general",
+  multerCloudFunction(allowedExtensions.Document).single("cv"),
+  applicationCon.applyGeneral
+);
+
+/**
+ * @swagger
  * /api/v1/applications/:
  *   get:
  *     summary: Get all applications

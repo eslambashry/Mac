@@ -60,6 +60,52 @@ export const applyForCareer = async (req, res, next) => {
   }
 };
 
+// General application without specific career
+export const applyGeneral = async (req, res, next) => {
+  try {
+    const { fullName, email, phone } = req.body;
+
+    // 🔴 Validate fields
+    if (!fullName || !email || !phone) {
+      return next(new CustomError("All fields are required", 400));
+    }
+
+    // 🔴 Validate CV
+    if (!req.file) {
+      return next(new CustomError("CV file is required", 400));
+    }
+
+    const customId = nanoid()
+
+    // 🔹 Upload CV to ImageKit
+    const uploadResult = await imagekit.upload({
+      file: req.file.buffer,
+      fileName: req.file.originalname,
+      folder: `${process.env.PROJECT_FOLDER}/Careers/CVs/${customId}`,
+    });
+
+    // 🔹 Create application (without career)
+    const application = await applicationsModel.create({
+      fullName,
+      email,
+      phone,
+      cv: {
+        fileUrl: uploadResult.url,
+        public_id: uploadResult.fileId,
+      },
+      customId
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Application submitted successfully",
+    });
+
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const getAllApplications = async (req, res, next) => {
   const applications = await applicationsModel
     .find()

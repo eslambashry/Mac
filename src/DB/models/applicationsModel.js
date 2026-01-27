@@ -4,7 +4,7 @@ const ApplicationSchema = new Schema({
   career: {
     type: Schema.Types.ObjectId,
     ref: 'Career',
-    required: true,
+    required: false,
   },
 
   fullName: {
@@ -21,17 +21,17 @@ const ApplicationSchema = new Schema({
   phone: {
     type: String,
     required: true,
-  }, 
+  },
 
-    cv: {
-      fileUrl: String,
-      public_id: String,
-    },
+  cv: {
+    fileUrl: String,
+    public_id: String,
+  },
 
-    customId: {
-      type: String,
-      required: true,
-    },
+  customId: {
+    type: String,
+    required: true,
+  },
 
   status: {
     type: String,
