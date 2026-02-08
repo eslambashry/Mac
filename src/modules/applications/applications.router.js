@@ -135,7 +135,7 @@ applicationRouter.get('/', applicationCon.getAllApplications)
  *       404:
  *         description: No applications found
  */
-applicationRouter.get('/byjob/:id', isAuth(systemRoles.ADMIN), applicationCon.getSingleCareerApplications)
+applicationRouter.get('/byjob/:id', isAuth([systemRoles.ADMIN, systemRoles.HR]), applicationCon.getSingleCareerApplications)
 
 /**
  * @swagger
@@ -192,7 +192,7 @@ applicationRouter.get('/:id', applicationCon.getSingleApplication)
  *       404:
  *         description: Application not found
  */
-applicationRouter.patch('/:id/status', isAuth(systemRoles.ADMIN), applicationCon.updateApplicationStatus)
+applicationRouter.patch('/:id/status', isAuth([systemRoles.ADMIN, systemRoles.HR]), applicationCon.updateApplicationStatus)
 
 /**
  * @swagger
@@ -215,7 +215,7 @@ applicationRouter.patch('/:id/status', isAuth(systemRoles.ADMIN), applicationCon
  *       404:
  *         description: Application not found
  */
-applicationRouter.delete('/:id', isAuth(systemRoles.ADMIN), applicationCon.deleteApplication)
+applicationRouter.delete('/:id', isAuth([systemRoles.ADMIN, systemRoles.HR]), applicationCon.deleteApplication)
 
 /**
  * @swagger
@@ -247,6 +247,6 @@ applicationRouter.delete('/:id', isAuth(systemRoles.ADMIN), applicationCon.delet
  *       404:
  *         description: No applications found to delete
  */
-applicationRouter.post('/bulk-delete', isAuth(systemRoles.ADMIN), applicationCon.bulkDeleteApplications)
+applicationRouter.post('/bulk-delete', isAuth([systemRoles.ADMIN, systemRoles.HR]), applicationCon.bulkDeleteApplications)
 
 export default applicationRouter;

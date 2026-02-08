@@ -73,7 +73,7 @@ const careerRouter = Router()
  *       201:
  *         description: Career created successfully
  */
-careerRouter.post('/create', isAuth(systemRoles.ADMIN), careerCon.createCareer)
+careerRouter.post('/create', isAuth([systemRoles.ADMIN, systemRoles.HR]), careerCon.createCareer)
 
 /**
  * @swagger
@@ -219,7 +219,7 @@ careerRouter.get('/en', careerCon.getAllEnglishCareer)
  *       404:
  *         description: Career not found
  */
-careerRouter.put("/:id", isAuth(systemRoles.ADMIN), careerCon.updateCareer);
+careerRouter.put("/:id", isAuth([systemRoles.ADMIN, systemRoles.HR]), careerCon.updateCareer);
 
 /**
  * @swagger
@@ -242,7 +242,7 @@ careerRouter.put("/:id", isAuth(systemRoles.ADMIN), careerCon.updateCareer);
  *       404:
  *         description: Career not found
  */
-careerRouter.patch("/:id/toggle", isAuth(systemRoles.ADMIN), careerCon.toggleCareerStatus);
+careerRouter.patch("/:id/toggle", isAuth([systemRoles.ADMIN, systemRoles.HR]), careerCon.toggleCareerStatus);
 
 /**
  * @swagger
@@ -265,7 +265,7 @@ careerRouter.patch("/:id/toggle", isAuth(systemRoles.ADMIN), careerCon.toggleCar
  *       404:
  *         description: Career not found
  */
-careerRouter.delete("/:id", isAuth(systemRoles.ADMIN), careerCon.deleteCareer);
+careerRouter.delete("/:id", isAuth([systemRoles.ADMIN, systemRoles.HR]), careerCon.deleteCareer);
 
 /**
  * @swagger
@@ -297,6 +297,6 @@ careerRouter.delete("/:id", isAuth(systemRoles.ADMIN), careerCon.deleteCareer);
  *       404:
  *         description: No careers found for the provided IDs
  */
-careerRouter.post("/bulk-delete", isAuth(systemRoles.ADMIN), careerCon.bulkDeleteCareers);
+careerRouter.post("/bulk-delete", isAuth([systemRoles.ADMIN, systemRoles.HR]), careerCon.bulkDeleteCareers);
 
 export default careerRouter
