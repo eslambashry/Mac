@@ -49,6 +49,19 @@ export const createCareer = async (req, res, next) => {
       );
     }
 
+    // 🔹 Process Newline Separated Arrays
+    const processArray = (input) => {
+      if (typeof input === "string") {
+        return input.split(/\r?\n/).filter((item) => item.trim() !== "");
+      }
+      return input;
+    };
+
+    const processedResponsibilitiesEn = processArray(responsibilities_en);
+    const processedResponsibilitiesAr = processArray(responsibilities_ar);
+    const processedRequirementsEn = processArray(requirements_en);
+    const processedRequirementsAr = processArray(requirements_ar);
+
     const career = await careerModel.create({
       title_en,
       title_ar,
@@ -68,11 +81,11 @@ export const createCareer = async (req, res, next) => {
       description_en,
       description_ar,
 
-      responsibilities_en,
-      responsibilities_ar,
+      responsibilities_en: processedResponsibilitiesEn,
+      responsibilities_ar: processedResponsibilitiesAr,
 
-      requirements_en,
-      requirements_ar,
+      requirements_en: processedRequirementsEn,
+      requirements_ar: processedRequirementsAr,
 
       order,
     });
@@ -202,6 +215,14 @@ export const updateCareer = async (req, res, next) => {
       order,
     } = req.body;
 
+    // Helper to process array inputs
+    const processArray = (input) => {
+      if (typeof input === "string") {
+        return input.split(/\r?\n/).filter((item) => item.trim() !== "");
+      }
+      return input;
+    };
+
     // update only sent fields
     if (title_en !== undefined) career.title_en = title_en;
     if (title_ar !== undefined) career.title_ar = title_ar;
@@ -228,14 +249,14 @@ export const updateCareer = async (req, res, next) => {
       career.description_ar = description_ar;
 
     if (responsibilities_en !== undefined)
-      career.responsibilities_en = responsibilities_en;
+      career.responsibilities_en = processArray(responsibilities_en);
     if (responsibilities_ar !== undefined)
-      career.responsibilities_ar = responsibilities_ar;
+      career.responsibilities_ar = processArray(responsibilities_ar);
 
     if (requirements_en !== undefined)
-      career.requirements_en = requirements_en;
+      career.requirements_en = processArray(requirements_en);
     if (requirements_ar !== undefined)
-      career.requirements_ar = requirements_ar;
+      career.requirements_ar = processArray(requirements_ar);
 
     if (isActive !== undefined) career.isActive = isActive;
     if (order !== undefined) career.order = order;
